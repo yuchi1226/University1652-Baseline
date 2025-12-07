@@ -511,29 +511,30 @@ exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=80, gamma=0.1)
 #
 # It should take around 1-2 hours on GPU.
 #
-dir_name = os.path.join('./model', name)
-if not opt.resume:
-    if not os.path.isdir(dir_name):
-        os.mkdir(dir_name)
-    # record every run
-    copyfile('train.py', dir_name + '/train.py')
-    copyfile('./model.py', dir_name + '/model.py')
-    # save opts
-    with open('%s/opts.yaml' % dir_name, 'w') as fp:
-        yaml.dump(vars(opt), fp, default_flow_style=False)
+if __name__ == '__main__':
+    dir_name = os.path.join('./model', name)
+    if not opt.resume:
+        if not os.path.isdir(dir_name):
+            os.mkdir(dir_name)
+        # record every run
+        copyfile('train.py', dir_name + '/train.py')
+        copyfile('./model.py', dir_name + '/model.py')
+        # save opts
+        with open('%s/opts.yaml' % dir_name, 'w') as fp:
+            yaml.dump(vars(opt), fp, default_flow_style=False)
 
-# model to gpu
-model = model.cuda()
-scaler = torch.cuda.amp.GradScaler()
+    # model to gpu
+    model = model.cuda()
+    scaler = torch.cuda.amp.GradScaler()
 
-criterion = nn.CrossEntropyLoss()
-if opt.moving_avg < 1.0:
-    model_test = copy.deepcopy(model)
-    num_epochs = 140
-else:
-    model_test = None
-    num_epochs = 120
+    criterion = nn.CrossEntropyLoss()
+    if opt.moving_avg < 1.0:
+        model_test = copy.deepcopy(model)
+        num_epochs = 140
+    else:
+        model_test = None
+        num_epochs = 120
 
-model = train_model(model, model_test, criterion, optimizer_ft, exp_lr_scheduler,
-                    scaler, num_epochs=num_epochs)
+    model = train_model(model, model_test, criterion, optimizer_ft, exp_lr_scheduler,
+                        scaler, num_epochs=num_epochs)
 
